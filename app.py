@@ -411,12 +411,13 @@ def colbert_similarity_to_query():
         logger.error(f"Error in /colbert-similarity: {str(e)}", exc_info=True)
         return jsonify({"error": "An internal error occurred during colbert similarity"}), 500
 
+# Start BGE M3 model initialization in a background thread before main
+# This ensures the model starts loading as soon as this module is imported
+start_model_initialization_thread()
+
 # --- Main ---
 if __name__ == '__main__':
-    # Start BGE M3 model initialization in a background thread
-    # This is critical for services that need the model ready before serving requests
-    # (e.g. Cloud Run, which might send requests soon after container start)
-    start_model_initialization_thread()
+    # Model initialization is now started before this point
     
     port = int(os.environ.get("PORT", 8080))
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
